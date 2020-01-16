@@ -7,28 +7,28 @@ Sentora 2 is a complete rewrite of the Sentora PHP code. A security strengthened
 
 ## What's new
 
-Centos 7, 8+ support
-Ubuntu 16, 18+ support
-Apache 2.4 with HTTP/2 support
-PHP7 in php-fpm mode
-Lets encrypt HTTPS by default
-Clients with separate user permissions
-Refactored code without known security bugs and bad coding practices
-In-Panel accessible Sentora store for free and paid module upgrades open for submissions by all module developer 
-Automatic upgrades and security updates
-Built in billing and administration module or enhanced client manager or a module for existing billing software*
-Up to date third party apps
-Installation coming with optimized config files and security settings
-API for central management of multiple installations
+* Centos 7, 8+ support
+* Ubuntu 16, 18+ support
+* Apache 2.4 with HTTP/2 support
+* PHP7 in php-fpm mode
+* Lets encrypt HTTPS by default
+* Clients with separate user permissions
+* Refactored code without known security bugs and bad coding practices
+* In-Panel accessible Sentora store for free and paid module upgrades open for submissions by all module developer 
+* Automatic upgrades and security updates
+* Built in billing and administration module or enhanced client manager or a module for existing billing software*
+* Up to date third party apps
+* Installation coming with optimized config files and security settings
+* API for central management of multiple installations
 
 ## What's old
 
-User interface won't be changed a lot so you'll still have that familiar user experience
+* User interface won't be changed a lot so you'll still have that familiar user experience
 
 ## What's a goner ?
 
-PHP < 7 support
-Centos < 7  support
+* PHP < 7 support
+* Centos < 7  support
 
 It's time to move on, do both yourself and your clients a favour. 
 
@@ -41,4 +41,3 @@ This repository is still considered under development, and the project in the pl
 Just merge and submit any errors and bug fixes.
 Check the project page to contribute in the right direction. 
 
-Vedran Bakija
