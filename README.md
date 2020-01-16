@@ -1,26 +1,44 @@
-# Sentora
+# Sentora 2
 
-* Version: 1.0.3
-* [Website](http://sentora.org/)
-* [Forums](http://forums.sentora.org/) for comments, discussion and community support.
-* [Bug Tracker](https://github.com/sentora/sentora-core/issues) for any bugs or security related issues.
+Sentora 2 is a complete rewrite of the Sentora PHP code. A security strengthened control panel that plays along with modern Linux server distros.
 
-## Description
+* [Website](http://sentora2.com/)
+* [Bug Tracker](https://github.com/VedranIteh/sentora-2/issues) for any bugs or security related issues.
 
-[Sentora](http://sentora.org) is based on an original fork of ZPanelCP, Sentora is an open-source web hosting control panel written in PHP and is designed to work with with Linux, UNIX and the BSD's.
+## What's new
 
-Sentora is developed and maintained by the original ZPanel team members ([ballen](http://bobbyallen.me), tgates, kandrews, motters etc.)
+Centos 7, 8+ support
+Ubuntu 16, 18+ support
+Apache 2.4 with HTTP/2 support
+PHP7 in php-fpm mode
+Lets encrypt HTTPS by default
+Clients with separate user permissions
+Refactored code without known security bugs and bad coding practices
+In-Panel accessible Sentora store for free and paid module upgrades open for submissions by all module developer 
+Automatic upgrades and security updates
+Built in billing and administration module or enhanced client manager or a module for existing billing software*
+Up to date third party apps
+Installation coming with optimized config files and security settings
+API for central management of multiple installations
 
-## Downloading Sentora
+## What's old
 
-To use Sentora in a production environment we recommend you use our automated installers which also take care of the installation of not only Sentora but also Apache, PHP, MySQL, BIND, ProFTPd etc.
+User interface won't be changed a lot so you'll still have that familiar user experience
 
-To download Sentora please use the links found on [our download page](http://sentora.org/download/).
+## What's a goner ?
 
-## License agreement
+PHP < 7 support
+Centos < 7  support
 
-Sentora is licensed under the [GNU GENERAL PUBLIC LICENSE (GPL v3)](LICENSE.md) a copy of this license is provided.
+It's time to move on, do both yourself and your clients a favour. 
 
-## Getting support
+## When/where can I download it ? 
 
-We provide excellent free (and premium) [support](http://sentora.org/support/) and [documentation](http://docs.sentora.org/?node=23) at our website.
+This repository is still considered under development, and the project in the planning phase. Check out the [Projects](https://github.com/VedranIteh/sentora-2/projects) tab if you're interested in a roadmap and release dates ahead us. Also the download section of sentora2.com website.
+
+## Want to contribute ?
+
+Just merge and submit any errors and bug fixes.
+Check the project page to contribute in the right direction. 
+
+Vedran Bakija
