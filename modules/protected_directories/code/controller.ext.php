@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright 2014-2015 Sentora Project (http://www.sentora.org/) 
+ * @copyright 2020 Sentora2 (http://www.sentora2.com/) 
  * 
  * This class handles all core module functionality.
  * @author Kevin Andrews <kevin@zvps.uk>

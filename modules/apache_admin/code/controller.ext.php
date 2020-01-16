@@ -1,11 +1,11 @@
 <?php
 
 /**
- * @copyright 2014-2015 Sentora Project (http://www.sentora.org/) 
- * Sentora is a GPL fork of the ZPanel Project whose original header follows:
+ * @copyright 2020 Sentora2 (http://www.sentora2.com/) 
+ * Sentora2 is a GPL fork of the Sentora Project found here:
  *
 
- * ZPanel - A Cross-Platform Open-Source Web Hosting Control panel.
+ * https://github.com/sentora/sentora-core
  *
  * @package ZPanel
  * @version $Id$

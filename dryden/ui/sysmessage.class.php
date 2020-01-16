@@ -1,8 +1,8 @@
 <?php
 
 /**
- * @copyright 2014-2015 Sentora Project (http://www.sentora.org/) 
- * Sentora is a GPL fork of the ZPanel Project whose original header follows:
+ * @copyright 2020 Sentora2 (http://www.sentora2.com/) 
+ * Sentora2 is a GPL fork of the Sentora Project found here:
  *
  * System message class, used to display CSS powered messages and warnings to the user through the template layer.
  * @package zpanelx
