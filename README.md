@@ -1,6 +1,6 @@
 # Sentora 2
 
-Sentora 2 is a complete rewrite of the Sentora PHP code. A security strengthened control panel that plays along with modern Linux server distros.
+Sentora 2 is a complete rewrite of the original Sentora/Zpanel PHP code. A security strengthened control panel that plays along with modern Linux server distros.
 
 * [Website](http://sentora2.com/)
 * [Bug Tracker](https://github.com/VedranIteh/sentora-2/issues) for any bugs or security related issues.
