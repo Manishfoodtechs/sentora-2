@@ -1,16 +1,9 @@
 <?php
 
 /**
- * @copyright 2014-2015 Sentora Project (http://www.sentora.org/) 
- * Sentora is a GPL fork of the ZPanel Project whose original header follows:
- *
- * The ZPanelX loader and default handler file.
- * @package zpanelx
- * @subpackage core
- * @author Bobby Allen (ballen@bobbyallen.me)
- * @copyright ZPanel Project (http://www.zpanelcp.com/)
- * @link http://www.zpanelcp.com/
- * @license GPL (http://www.gnu.org/licenses/gpl.html)
+ * @copyright 2020 Sentora2 (http://www.sentora2.com/) 
+ * Sentora2 is a GPL fork of the Sentora Project found here:
+ * https://github.com/sentora/sentora-core
  */
 session_start();
 require_once 'dryden/loader.inc.php';
