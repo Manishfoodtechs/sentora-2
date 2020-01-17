@@ -1,3 +1,4 @@
+![alt text](/VedranIteh/sentora-2/blob/master/etc/styles/Sentora_Default/img/logos/S2-LOGO.png)
 # Sentora 2
 
 Sentora 2 is a complete rewrite of the original Sentora/Zpanel PHP code. A security strengthened control panel that plays along with modern Linux server distros.
