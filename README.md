@@ -38,6 +38,7 @@ This repository is still considered under development, and the project in the pl
 
 ## Want to contribute ?
 
-Just merge and submit any errors and bug fixes.
+Check the Issues tab, throw ideas in the RFC posts.
+Merge and commit any errors and bug fixes.
 Check the project page to contribute in the right direction. 
 
