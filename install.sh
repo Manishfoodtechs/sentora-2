@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Official Sentora Automated Installation Script
+# Sentora2 Automated Installation Script
 # =============================================
 #
 #  This program is free software: you can redistribute it and/or modify
@@ -37,9 +37,9 @@
 # 1.0.3 - example stable tag
 ##
 SENTORA_INSTALLER_VERSION="master"
-SENTORA_CORE_VERSION="1.0.1"
+SENTORA_CORE_VERSION="2.0"
 
-PANEL_PATH="/etc/sentora"
+PANEL_PATH="/var/sentora/hostdata/localhost/"
 PANEL_DATA="/var/sentora"
 PANEL_UPGRADE=false
 
@@ -70,12 +70,10 @@ ARCH=$(uname -m)
 
 echo "Detected : $OS  $VER  $ARCH"
 
-if [[ "$OS" = "CentOs" && ("$VER" = "6" || "$VER" = "7" ) || 
-      "$OS" = "Ubuntu" && ("$VER" = "12.04" || "$VER" = "14.04" ) || 
-      "$OS" = "debian" && ("$VER" = "7" || "$VER" = "8" ) ]] ; then
+if [[ ("$OS" = "CentOs" && "$VER" >= "7") || ("$OS" = "Ubuntu" && "$VER" >= "14") || ("$OS" = "debian" && "$VER" >= "8" ) ]] ; then
     echo "Ok."
 else
-    echo "Sorry, this OS is not supported by Sentora." 
+    echo "Sorry, this OS is either expired already or bound to go EOL soon and as such is not supported by Sentora2 security standards." 
     exit 1
 fi
 
@@ -114,15 +112,13 @@ if [[ "$OS" = "CentOs" ]] ; then
     inst() {
        rpm -q "$1" &> /dev/null
     }
+## only mysql from now on
 
-    if  [[ "$VER" = "7" ]]; then
-        DB_PCKG="mariadb" &&  echo "DB server will be mariaDB"
-    else 
-        DB_PCKG="mysql" && echo "DB server will be mySQL"
-    fi
+    DB_PCKG="mysql" && echo "DB server will be mySQL"
     HTTP_PCKG="httpd"
     PHP_PCKG="php"
     BIND_PCKG="bind"
+
 elif [[ "$OS" = "Ubuntu" || "$OS" = "debian" ]]; then
     PACKAGE_INSTALLER="apt-get -yqq install"
     PACKAGE_REMOVER="apt-get -yqq remove"
@@ -130,7 +126,7 @@ elif [[ "$OS" = "Ubuntu" || "$OS" = "debian" ]]; then
     inst() {
        dpkg -l "$1" 2> /dev/null | grep '^ii' &> /dev/null
     }
-    
+    ### needs to be set for php7 in fpm
     DB_PCKG="mysql-server"
     HTTP_PCKG="apache2"
     PHP_PCKG="apache2-mod-php5"
@@ -254,7 +250,7 @@ if [[ "$PANEL_FQDN" == "" ]] ; then
     PUBLIC_IP=$extern_ip
     while true; do
         echo ""
-        read -e -p "Enter the sub-domain you want to access Sentora panel: " -i "$PANEL_FQDN" PANEL_FQDN
+        read -e -p "Enter the sub-domain.domain.com you want to use to access Sentora panel: " -i "$PANEL_FQDN" PANEL_FQDN
 
         if [[ "$PUBLIC_IP" != "$local_ip" ]]; then
           echo -e "\nThe public IP of the server is $PUBLIC_IP. Its local IP is $local_ip"
@@ -352,7 +348,7 @@ if [[ "$OS" = "Ubuntu" || "$OS" = "debian" ]]; then
     fi
 fi
 
-#--- Adapt repositories and packages sources
+#--- Adapt repositories and packages sources, enable php7
 echo -e "\n-- Updating repositories and packages sources"
 if [[ "$OS" = "CentOs" ]]; then
 #EPEL Repo Install
@@ -386,7 +382,7 @@ if [[ "$OS" = "CentOs" ]]; then
     }
     disablerepo "elrepo"
     disablerepo "epel-testing"
-    disablerepo "remi"
+    #disablerepo "remi"
     disablerepo "rpmforge"
     disablerepo "rpmfusion-free-updates"
     disablerepo "rpmfusion-free-updates-testing"
