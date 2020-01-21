@@ -39,7 +39,7 @@
 SENTORA_INSTALLER_VERSION="master"
 SENTORA_CORE_VERSION="2.0"
 
-PANEL_PATH="/var/sentora/hostdata/localhost/"
+PANEL_PATH="/var/sentora/hostdata/adm_panel/"
 PANEL_DATA="/var/sentora"
 PANEL_UPGRADE=false
 
@@ -163,8 +163,7 @@ fi
 # Update repositories and Install wget and util used to grab server IP
 echo -e "\n-- Installing wget and dns utils required to manage inputs"
 if [[ "$OS" = "CentOs" ]]; then
-    yum -y update
-    $PACKAGE_INSTALLER bind-utils
+    $PACKAGE_INSTALLER bind-utils yum-utils
 elif [[ "$OS" = "Ubuntu" || "$OS" = "debian" ]]; then
     apt-get -yqq update   #ensure we can install
     $PACKAGE_INSTALLER dnsutils
@@ -218,8 +217,6 @@ fi
 if [[ "$tz" == "" && "$PANEL_FQDN" == "" ]] ; then
     # Propose selection list for the time zone
     echo "Preparing to select timezone, please wait a few seconds..."
-    $PACKAGE_INSTALLER tzdata
-    # setup server timezone
     if [[ "$OS" = "CentOs" ]]; then
         # make tzselect to save TZ in /etc/timezone
         echo "echo \$TZ > /etc/timezone" >> /usr/bin/tzselect
@@ -348,22 +345,16 @@ if [[ "$OS" = "Ubuntu" || "$OS" = "debian" ]]; then
     fi
 fi
 
-#--- Adapt repositories and packages sources, enable php7
+#--- Adapt repositories and package sources why rpm ? lets use yum instead.
 echo -e "\n-- Updating repositories and packages sources"
 if [[ "$OS" = "CentOs" ]]; then
-#EPEL Repo Install
-  EPEL_BASE_URL="http://dl.fedoraproject.org/pub/epel/$VER/$ARCH";
-  if  [[ "$VER" = "7" ]]; then
-     EPEL_FILE=$(wget -q -O- "$EPEL_BASE_URL/Packages/e/" | grep -oP '(?<=href=")epel-release.*(?=">)')
-     wget "$EPEL_BASE_URL/Packages/e/$EPEL_FILE"
-  else
-     EPEL_FILE=$(wget -q -O- "$EPEL_BASE_URL/" | grep -oP '(?<=href=")epel-release.*(?=">)')
-     wget "$EPEL_BASE_URL/$EPEL_FILE"
-  fi
-  $PACKAGE_INSTALLER -y install epel-release*.rpm
-  rm "$EPEL_FILE"
-    
-    #To fix some problems of compatibility use of mirror centos.org to all users
+
+$PACKAGE_INSTALLER epel-release
+wget http://rpms.remirepo.net/enterprise/remi-release-$VER.rpm
+$PACKAGE_INSTALLER remi*.rpm
+yum-config-manager --enable remi-php73
+  
+  #To fix some problems of compatibility use of mirror centos.org to all users
     #Replace all mirrors by base repos to avoid any problems.
     sed -i 's|mirrorlist=http://mirrorlist.centos.org|#mirrorlist=http://mirrorlist.centos.org|' "/etc/yum.repos.d/CentOS-Base.repo"
     sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://mirror.centos.org|' "/etc/yum.repos.d/CentOS-Base.repo"
@@ -375,6 +366,7 @@ if [[ "$OS" = "CentOs" ]]; then
     fi
 
     #disable deposits that could result in installation errors
+    #clean install doesnt have these
     disablerepo() {
         if [ -f "/etc/yum.repos.d/$1.repo" ]; then
             sed -i 's/enabled=1/enabled=0/g' "/etc/yum.repos.d/$1.repo"
@@ -382,7 +374,7 @@ if [[ "$OS" = "CentOs" ]]; then
     }
     disablerepo "elrepo"
     disablerepo "epel-testing"
-    #disablerepo "remi"
+    #disablerepo "remi" we'll leave this for php7
     disablerepo "rpmforge"
     disablerepo "rpmfusion-free-updates"
     disablerepo "rpmfusion-free-updates-testing"
@@ -395,12 +387,13 @@ if [[ "$OS" = "CentOs" ]]; then
     service sendmail stop
     chkconfig sendmail off
 
-    # disable firewall
-    if  [[ "$VER" = "7" ]]; then
-        FIREWALL_SERVICE="firewalld"
-    else 
+    # disable firewall - Sentora
+    # no, lets be leet - Vedran
+    #if  [[ "$VER" = "7" ]]; then
+     #   FIREWALL_SERVICE="firewalld"
+    #else 
         FIREWALL_SERVICE="iptables"
-    fi
+    #fi
     service "$FIREWALL_SERVICE" save
     service "$FIREWALL_SERVICE" stop
     chkconfig "$FIREWALL_SERVICE" off
@@ -537,100 +530,11 @@ rm -rf $PANEL_PATH/panel/modules/*/tests/
 rm -rf $PANEL_PATH/composer.json
 rm -rf $PANEL_PATH/composer.lock
 
-###
-# ZPanel Upgrade - Clear down all old code (stops orphaned files)
-###
-if [ ! -L "/etc/zpanel" ] && [ -d "/etc/zpanel" ]; then
-
-    echo -e "Upgrading ZPanelCP 10.1.0 to Sentora 1.0.1";
-
-    PANEL_UPGRADE=true
-
-    mv /etc/zpanel/configs /root/zpanel_configs_backup
-
-    ## Move main directories to new sentora location ##
-    mv /etc/zpanel/* $PANEL_PATH
-    mv /var/zpanel/* $PANEL_DATA
-
-    rm -rf /etc/zpanel/
-    rm -rf /var/zpanel/
-
-    ## Removing core for upgrade
-    rm -rf $PANEL_PATH/panel/bin/
-    rm -rf $PANEL_PATH/panel/dryden/
-    rm -rf $PANEL_PATH/panel/etc/
-    rm -rf $PANEL_PATH/panel/inc/
-    rm -rf $PANEL_PATH/panel/index.php
-    rm -rf $PANEL_PATH/panel/LICENSE.md
-    rm -rf $PANEL_PATH/panel/README.md
-    rm -rf $PANEL_PATH/panel/robots.txt
-    rm -rf $PANEL_PATH/panel/modules/aliases
-    rm -rf $PANEL_PATH/panel/modules/apache_admin
-    rm -rf $PANEL_PATH/panel/modules/backup_admin
-    rm -rf $PANEL_PATH/panel/modules/backupmgr
-    rm -rf $PANEL_PATH/panel/modules/client_notices
-    rm -rf $PANEL_PATH/panel/modules/cron
-    rm -rf $PANEL_PATH/panel/modules/distlists
-    rm -rf $PANEL_PATH/panel/modules/dns_admin
-    rm -rf $PANEL_PATH/panel/modules/dns_manager
-    rm -rf $PANEL_PATH/panel/modules/domains
-    rm -rf $PANEL_PATH/panel/modules/faqs
-    rm -rf $PANEL_PATH/panel/modules/forwarders
-    rm -rf $PANEL_PATH/panel/modules/ftp_admin
-    rm -rf $PANEL_PATH/panel/modules/ftp_management
-    rm -rf $PANEL_PATH/panel/modules/mail_admin
-    rm -rf $PANEL_PATH/panel/modules/mailboxes
-    rm -rf $PANEL_PATH/panel/modules/manage_clients
-    rm -rf $PANEL_PATH/panel/modules/manage_groups
-    rm -rf $PANEL_PATH/panel/modules/moduleadmin
-    rm -rf $PANEL_PATH/panel/modules/my_account
-    rm -rf $PANEL_PATH/panel/modules/mysql_databases
-    rm -rf $PANEL_PATH/panel/modules/mysql_users
-    rm -rf $PANEL_PATH/panel/modules/news
-    rm -rf $PANEL_PATH/panel/modules/packages
-    rm -rf $PANEL_PATH/panel/modules/parked_domains
-    rm -rf $PANEL_PATH/panel/modules/password_assistant
-    rm -rf $PANEL_PATH/panel/modules/phpinfo
-    rm -rf $PANEL_PATH/panel/modules/phpmyadmin
-    rm -rf $PANEL_PATH/panel/modules/phpsysinfo
-    rm -rf $PANEL_PATH/panel/modules/services
-    rm -rf $PANEL_PATH/panel/modules/shadowing
-    rm -rf $PANEL_PATH/panel/modules/sub_domains
-    rm -rf $PANEL_PATH/panel/modules/theme_manager
-    rm -rf $PANEL_PATH/panel/modules/updates
-    rm -rf $PANEL_PATH/panel/modules/usage_viewer
-    rm -rf $PANEL_PATH/panel/modules/webalizer_stats
-    rm -rf $PANEL_PATH/panel/modules/webmail
-    rm -rf $PANEL_PATH/panel/modules/zpanelconfig
-    rm -rf $PANEL_PATH/panel/modules/zpx_core_module
-
-    ###
-    # Remove links and files created by installer
-    ###
-    rm -f /usr/bin/zppy
-    rm -f /usr/bin/setso
-    rm -f /usr/bin/setzadmin
-    
-    rm -f /etc/postfix/master.cf
-    rm -f /etc/postfix/main.cf
-    rm -f /var/spool/vacation/vacation.pl
-    rm -f /var/sentora/sieve/globalfilter.sieve
-    rm -f /etc/dovecot/dovecot.conf
-    rm -f /etc/proftpd.conf
-
-    mysqlpassword=$(cat /etc/sentora/panel/cnf/db.php | grep "pass" | cut -d \' -f 2);
-
-    ## Do NOT copy the new cnf directory
-    rm -rf "$PANEL_PATH/sentora-core-$SENTORA_CORE_VERSION/cnf"
- 
-fi
-
 ## cp can be aliased to stop overwriting of files in centos use full path to cp
 /bin/cp -rf "$PANEL_PATH/sentora-core-$SENTORA_CORE_VERSION/." "$PANEL_PATH/panel/"
 rm sentora_core.zip
 rm "$PANEL_PATH/panel/LICENSE.md" "$PANEL_PATH/panel/README.md" "$PANEL_PATH/panel/.gitignore"
 rm -rf "$PANEL_PATH/_delete_me" "$PANEL_PATH/.gitignore"
-
 
 #--- Set-up Sentora directories and configure permissions
 PANEL_CONF="$PANEL_PATH/configs"
@@ -642,13 +546,9 @@ chmod -R 777 $PANEL_PATH
 mkdir -p $PANEL_DATA/backups
 chmod -R 777 $PANEL_DATA/
 
-# Links for compatibility with zpanel access
-ln -s $PANEL_PATH /etc/zpanel
-ln -s $PANEL_DATA /var/zpanel
-
 #--- Prepare Sentora executables
-chmod +x $PANEL_PATH/panel/bin/zppy 
-ln -s $PANEL_PATH/panel/bin/zppy /usr/bin/zppy
+#chmod +x $PANEL_PATH/panel/bin/zppy 
+$ln -s $PANEL_PATH/panel/bin/zppy /usr/bin/zppy
 
 chmod +x $PANEL_PATH/panel/bin/setso
 ln -s $PANEL_PATH/panel/bin/setso /usr/bin/setso
@@ -691,17 +591,17 @@ old_hostname=$(cat /etc/hostname)
 echo "$PANEL_FQDN" > /etc/hostname
 
 # In file hosts
-sed -i "/127.0.1.1[\t ]*$old_hostname/d" /etc/hosts
+#sed -i "/127.0.1.1[\t ]*$old_hostname/d" /etc/hosts  ???what the hell is this
 sed -i "s|$old_hostname|$PANEL_FQDN|" /etc/hosts
 
 # For current session
 hostname "$PANEL_FQDN"
 
 # In network file
-if [[ "$OS" = "CentOs" && "$VER" = "6" ]]; then
-    sed -i "s|^\(HOSTNAME=\).*\$|HOSTNAME=$PANEL_FQDN|" /etc/sysconfig/network
-    /etc/init.d/network restart
-fi
+#if [[ "$OS" = "CentOs" && "$VER" = "6" ]]; then
+ #   sed -i "s|^\(HOSTNAME=\).*\$|HOSTNAME=$PANEL_FQDN|" /etc/sysconfig/network
+ #   /etc/init.d/network restart
+#fi
 
 #--- Some functions used many times below
 # Random password generator function
