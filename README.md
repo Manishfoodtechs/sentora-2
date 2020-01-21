@@ -20,7 +20,9 @@ Sentora 2 is a complete rewrite of the original Sentora/Zpanel PHP code. A secur
 * Built in billing and administration module or enhanced client manager or a module for existing billing software*
 * Up to date third party apps
 * Installation coming with optimized config files and security settings
+* Mail deliverability optimization with dkim, dmarc, spf, spamassasin, clamav automatic settings upon account creation
 * API for central management of multiple installations
+* anti zombie usage. Not 100% sure how to approach this but IP reputation and outgoing traffic evaluation could be a thing.
 
 ## What's old
 
