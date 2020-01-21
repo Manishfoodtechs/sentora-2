@@ -15,7 +15,7 @@ Sentora 2 is a complete rewrite of the original Sentora/Zpanel PHP code. A secur
 * Lets encrypt HTTPS by default
 * Clients with separate user permissions
 * Refactored code without known security bugs and bad coding practices
-* In-Panel accessible Sentora store for free and paid module upgrades open for submissions by all module developer 
+* In-Panel accessible Sentora store for free and paid module upgrades open for submissions by all module developers 
 * Automatic upgrades and security updates
 * Built in billing and administration module or enhanced client manager or a module for existing billing software*
 * Up to date third party apps
