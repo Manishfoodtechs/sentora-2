@@ -683,7 +683,12 @@ if [[ "$OS" = "CentOs" ]]; then
 #--- Postfix
 echo -e "\n-- Installing Postfix"
 if [[ "$OS" = "CentOs" ]]; then
-    $PACKAGE_INSTALLER postfix postfix-perl-scripts
+    
+    wget http://mirror.ghettoforge.org/distributions/gf/gf-release-latest.gf.el7.noarch.rpm
+    yum install gf-release\*
+    yum-config-manager --enable gf-plus
+    yum -y remove postfix
+    $PACKAGE_INSTALLER postfix3 postfix3-perl-scripts
     USR_LIB_PATH="/usr/libexec"
 elif [[ "$OS" = "Ubuntu" ]]; then
     $PACKAGE_INSTALLER postfix postfix-mysql
@@ -691,9 +696,8 @@ elif [[ "$OS" = "Ubuntu" ]]; then
 fi
 
 postfixpassword=$(passwordgen);
-if [ $PANEL_UPGRADE == false ]; then
-    mysql -u root -p"$mysqlpassword" < $PANEL_CONF/sentora-install/sql/sentora_postfix.sql
-fi
+
+mysql -u root -p"$mysqlpassword" < $PANEL_CONF/sentora-install/sql/sentora_postfix.sql
 
 ## grant will also create users which don't exist and update existing users with password ##
 mysql -u root -p"$mysqlpassword" -e "GRANT ALL PRIVILEGES ON sentora_postfix .* TO 'postfix'@'localhost' identified by '$postfixpassword';";
