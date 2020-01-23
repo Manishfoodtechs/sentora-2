@@ -39,7 +39,7 @@
 SENTORA_INSTALLER_VERSION="master"
 SENTORA_CORE_VERSION="2.0"
 
-PANEL_PATH="/var/sentora/hostdata/adm_panel/"
+PANEL_PATH="/etc/sentora"
 PANEL_DATA="/var/sentora"
 PANEL_UPGRADE=false
 
@@ -628,14 +628,26 @@ fi
 
 #--- MySQL
 echo -e "\n-- Installing MySQL"
-$PACKAGE_INSTALLER "$DB_PCKG"
+
+
 if [[ "$OS" = "CentOs" ]]; then
-    $PACKAGE_INSTALLER "DB_PCKG-devel" "$DB_PCKG-server" 
-    MY_CNF_PATH="/etc/my.cnf"
+    
+    	MY_CNF_PATH="/etc/my.cnf"
+	DB_SERVICE="mysqld"
     if  [[ "$VER" = "7" ]]; then
-        DB_SERVICE="mariadb"
-    else 
-        DB_SERVICE="mysqld"
+        wget https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
+	yum install mysql80-community-release-el7-3.noarch.rpm
+	yum-config-manager --disable mysql8\*
+	yum-config-manager --enable mysql5\*
+	$PACKAGE_INSTALLER "$DB_PCKG" "DB_PCKG-devel" "$DB_PCKG-server"
+	
+    elif [[ "$VER" = "8" ]]; then
+    	wget https://dev.mysql.com/get/mysql80-community-release-el8-1.noarch.rpm
+    	yum install mysql80-community-release-el8-1.noarch.rpm
+    	yum-config-manager --disable mysql8\*
+	yum-config-manager --enable mysql5\*
+	$PACKAGE_INSTALLER "$DB_PCKG" "DB_PCKG-devel" "$DB_PCKG-server"
+    	
     fi
 elif [[ "$OS" = "Ubuntu" || "$OS" = "debian" ]]; then
     $PACKAGE_INSTALLER bsdutils libsasl2-modules-sql libsasl2-modules
@@ -647,48 +659,25 @@ elif [[ "$OS" = "Ubuntu" || "$OS" = "debian" ]]; then
 fi
 service $DB_SERVICE start
 
-# setup mysql root password only if mysqlpassword is empty
-if [ -z "$mysqlpassword" ]; then
-    mysqlpassword=$(passwordgen);
-    mysqladmin -u root password "$mysqlpassword"
-fi
-
-# small cleaning of mysql access
-mysql -u root -p"$mysqlpassword" -e "DELETE FROM mysql.user WHERE User='root' AND Host != 'localhost'";
-mysql -u root -p"$mysqlpassword" -e "DELETE FROM mysql.user WHERE User=''";
-mysql -u root -p"$mysqlpassword" -e "FLUSH PRIVILEGES";
-
-# remove test table that is no longer used
-mysql -u root -p"$mysqlpassword" -e "DROP DATABASE IF EXISTS test";
+# print password, secure installation
+	grep 'temporary password' /var/log/mysqld.log
+	mysql_secure_installation -D
+	clear
+	echo Please tell us the new root password you\'ve choosen:\n
+	read mysqlpassword
 
 # secure SELECT "hacker-code" INTO OUTFILE 
 sed -i "s|\[mysqld\]|&\nsecure-file-priv = /var/tmp|" $MY_CNF_PATH
 
 # setup sentora access and core database
-if [ $PANEL_UPGRADE == true ]; then
 
-    mysql -u root -p"$mysqlpassword" < $PANEL_CONF/sentora-update/zpanel/sql/update-structure.sql
-    mysql -u root -p"$mysqlpassword" < $PANEL_CONF/sentora-update/zpanel/sql/update-data.sql
-    
-    mysqldump -u root -p"$mysqlpassword" zpanel_core | mysql -u root -p"$mysqlpassword" -D sentora_core
-    mysqldump -u root -p"$mysqlpassword" zpanel_postfix | mysql -u root -p"$mysqlpassword" -D sentora_postfix
-    mysqldump -u root -p"$mysqlpassword" zpanel_proftpd | mysql -u root -p"$mysqlpassword" -D sentora_proftpd
-    mysqldump -u root -p"$mysqlpassword" zpanel_roundcube | mysql -u root -p"$mysqlpassword" -D sentora_roundcube
-
-    sed -i "s|zpanel_core|sentora_core|" $PANEL_PATH/panel/cnf/db.php
-
-else
-    sed -i "s|YOUR_ROOT_MYSQL_PASSWORD|$mysqlpassword|" $PANEL_PATH/panel/cnf/db.php
+    sed -i "s|YOUR_ROOT_MYSQL_PASSWORD|$mysqlpassword|" $PANEL_PATH/cnf/db.php
     mysql -u root -p"$mysqlpassword" < $PANEL_CONF/sentora-install/sql/sentora_core.sql
-fi
+
 # Register mysql/mariadb service for autostart
 if [[ "$OS" = "CentOs" ]]; then
-    if [[ "$VER" == "7" ]]; then
         systemctl enable "$DB_SERVICE".service
-    else
-        chkconfig "$DB_SERVICE" on
     fi
-fi
 
 
 #--- Postfix
