@@ -680,7 +680,7 @@ if [[ "$OS" = "CentOs" ]]; then
     fi
 
 
-#--- Postfix
+#--- Postfix but 3.x this time, lets use postscreen and other cool new features
 echo -e "\n-- Installing Postfix"
 if [[ "$OS" = "CentOs" ]]; then
     
@@ -719,7 +719,11 @@ chmod -R 770 /var/spool/vacation
 add_local_domain "$PANEL_FQDN"
 add_local_domain "autoreply.$PANEL_FQDN"
 
-rm -rf /etc/postfix/main.cf /etc/postfix/master.cf
+#instead of deleting we'll rename it for reference by admin in future releases
+#rm -rf /etc/postfix/main.cf /etc/postfix/master.cf
+mv /etc/postfix/main.cf /etc/postfix/main.old
+mv /etc/postfix/master.cf /etc/postfix/master.old
+
 ln -s $PANEL_CONF/postfix/master.cf /etc/postfix/master.cf
 ln -s $PANEL_CONF/postfix/main.cf /etc/postfix/main.cf
 ln -s $PANEL_CONF/postfix/vacation.pl /var/spool/vacation/vacation.pl
@@ -743,21 +747,18 @@ sed -i '/smtpd_bind_address/d' $PANEL_CONF/postfix/master.cf
 
 # Register postfix service for autostart (it is automatically started)
 if [[ "$OS" = "CentOs" ]]; then
-    if [[ "$VER" == "7" ]]; then
         systemctl enable postfix.service
         # systemctl start postfix.service
-    else
-        chkconfig postfix on
-        # /etc/init.d/postfix start
-    fi
 fi
 
 
-#--- Dovecot (includes Sieve)
+#--- Dovecot (includes Sieve) for now lets stay on 2.2
 echo -e "\n-- Installing Dovecot"
 if [[ "$OS" = "CentOs" ]]; then
+
     $PACKAGE_INSTALLER dovecot dovecot-mysql dovecot-pigeonhole 
     sed -i "s|#first_valid_uid = ?|first_valid_uid = $VMAIL_UID\n#last_valid_uid = $VMAIL_UID\n\nfirst_valid_gid = $MAIL_GID\n#last_valid_gid = $MAIL_GID|" $PANEL_CONF/dovecot2/dovecot.conf
+
 elif [[ "$OS" = "Ubuntu" || "$OS" = "debian" ]]; then
     $PACKAGE_INSTALLER dovecot-mysql dovecot-imapd dovecot-pop3d dovecot-common dovecot-managesieved dovecot-lmtpd 
     sed -i "s|#first_valid_uid = ?|first_valid_uid = $VMAIL_UID\nlast_valid_uid = $VMAIL_UID\n\nfirst_valid_gid = $MAIL_GID\nlast_valid_gid = $MAIL_GID|" $PANEL_CONF/dovecot2/dovecot.conf
