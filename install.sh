@@ -793,8 +793,10 @@ if [[ "$OS" = "CentOs" ]]; then
     fi
 fi
 
-#--- Apache server
+#--- Apache server bump it up for 2.4.4
 echo -e "\n-- Installing and configuring Apache"
+cd /etc/yum.repos.d && wget https://repo.codeit.guru/codeit.el`rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release)`.repo
+cd
 $PACKAGE_INSTALLER "$HTTP_PCKG"
 if [[ "$OS" = "CentOs" ]]; then
     $PACKAGE_INSTALLER "$HTTP_PCKG-devel"
@@ -803,12 +805,12 @@ if [[ "$OS" = "CentOs" ]]; then
     HTTP_SERVICE="httpd"
     HTTP_USER="apache"
     HTTP_GROUP="apache"
-    if [[ "$VER" = "7" ]]; then
+    
         # Disable extra modules in centos 7
         disable_file /etc/httpd/conf.modules.d/01-cgi.conf
         disable_file /etc/httpd/conf.modules.d/00-lua.conf
         disable_file /etc/httpd/conf.modules.d/00-dav.conf
-    else
+    
         disable_file /etc/httpd/conf.d/welcome.conf
         disable_file /etc/httpd/conf.d/webalizer.conf
         # Disable more extra modules in centos 6.x /etc/httpd/httpd.conf dav/ldap/cgi/proxy_ajp
@@ -818,7 +820,7 @@ if [[ "$OS" = "CentOs" ]]; then
 	    sed -i "s|LoadModule dav_fs_module modules|#LoadModule dav_fs_module modules|" "$HTTP_CONF_PATH"
 	    sed -i "s|LoadModule proxy_ajp_module modules|#LoadModule proxy_ajp_module modules|" "$HTTP_CONF_PATH"
     
-    fi     
+         
 elif [[ "$OS" = "Ubuntu" || "$OS" = "debian" ]]; then
     $PACKAGE_INSTALLER libapache2-mod-bw
     HTTP_CONF_PATH="/etc/apache2/apache2.conf"
@@ -829,13 +831,8 @@ elif [[ "$OS" = "Ubuntu" || "$OS" = "debian" ]]; then
     a2enmod rewrite
 fi
 
-if ! grep -q "Include $PANEL_CONF/apache/httpd.conf" "$HTTP_CONF_PATH"; then
     echo "Include $PANEL_CONF/apache/httpd.conf" >> "$HTTP_CONF_PATH";
-    ## Remove old include
-    if [ $PANEL_UPGRADE == true ]; then
-        sed -i "s|Include /etc/zpanel/configs/apache/httpd.conf||" "$HTTP_CONF_PATH";
-    fi
-fi
+
 add_local_domain "$(hostname)"
 
 if ! grep -q "apache ALL=NOPASSWD: $PANEL_PATH/panel/bin/zsudo" /etc/sudoers; then
@@ -851,7 +848,7 @@ mysql -u root -p"$mysqlpassword" -e "UPDATE sentora_core.x_settings SET so_value
 mysql -u root -p"$mysqlpassword" -e "UPDATE sentora_core.x_settings SET so_value_tx='$HTTP_SERVICE' WHERE so_name_vc='apache_sn'"
 
 #Set keepalive on (default is off)
-sed -i "s|KeepAlive Off|KeepAlive On|" "$HTTP_CONF_PATH"
+#sed -i "s|KeepAlive Off|KeepAlive On|" "$HTTP_CONF_PATH"
 
 # Permissions fix for Apache and ProFTPD (to enable them to play nicely together!)
 if ! grep -q "umask 002" "$HTTP_VARS_PATH"; then
@@ -880,9 +877,9 @@ elif [[ "$OS" = "Ubuntu" || "$OS" = "debian" ]]; then
 fi
 
 # adjustments for apache 2.4
-if [[ ("$OS" = "CentOs" && "$VER" = "7") || 
-      ("$OS" = "Ubuntu" && "$VER" = "14.04") || 
-      ("$OS" = "debian" && "$VER" = "8") ]] ; then 
+if [[ ("$OS" = "CentOs" && "$VER" >= "7") || 
+      ("$OS" = "Ubuntu" && "$VER" >= "14.04") || 
+      ("$OS" = "debian" && "$VER" >= "8") ]] ; then 
     # Order deny,allow / Deny from all   ->  Require all denied
     sed -i 's|Order deny,allow|Require all denied|I'  $PANEL_CONF/apache/httpd.conf
     sed -i '/Deny from all/d' $PANEL_CONF/apache/httpd.conf
@@ -914,8 +911,7 @@ elif [[ "$OS" = "Ubuntu" || "$OS" = "debian" ]]; then
     $PACKAGE_INSTALLER libapache2-mod-php5 php5-common php5-cli php5-mysql php5-gd php5-mcrypt php5-curl php-pear php5-imap php5-xmlrpc php5-xsl php5-intl
     if [ "$VER" = "14.04" ]; then
         php5enmod mcrypt  # missing in the package for Ubuntu 14, is this needed for debian 8 as well?
-    else
-        $PACKAGE_INSTALLER php5-suhosin
+    
     fi
     PHP_INI_PATH="/etc/php5/apache2/php.ini"
 fi
@@ -947,28 +943,8 @@ sed -i "s|;upload_tmp_dir =|upload_tmp_dir = $PANEL_DATA/temp/|" $PHP_INI_PATH
 sed -i "s|expose_php = On|expose_php = Off|" $PHP_INI_PATH
 
 # Build suhosin for PHP 5.x which is required by Sentora. 
-if [[ "$OS" = "CentOs" || "$OS" = "debian" || ( "$OS" = "Ubuntu" && "$VER" = "14.04") ]] ; then
-    echo -e "\n# Building suhosin"
-    if [[ "$OS" = "Ubuntu" || "$OS" = "debian" ]]; then
-        $PACKAGE_INSTALLER php5-dev
-    fi
-    SUHOSIN_VERSION="0.9.37.1"
-    wget -nv -O suhosin.zip https://github.com/stefanesser/suhosin/archive/$SUHOSIN_VERSION.zip
-    unzip -q suhosin.zip
-    rm -f suhosin.zip
-    cd suhosin-$SUHOSIN_VERSION
-    phpize &> /dev/null
-    ./configure &> /dev/null
-    make &> /dev/null
-    make install 
-    cd ..
-    rm -rf suhosin-$SUHOSIN_VERSION
-    if [[ "$OS" = "CentOs" ]]; then 
-        echo 'extension=suhosin.so' > $PHP_EXT_PATH/suhosin.ini
-    elif [[ "$OS" = "Ubuntu" || "$OS" = "debian" ]]; then
-        sed -i 'N;/default extension directory./a\extension=suhosin.so' $PHP_INI_PATH
-    fi	
-fi
+# no, build snufflepegasus ... who ever spelled that correctly...doh
+
 
 # Register apache(+php) service for autostart and start it
 if [[ "$OS" = "CentOs" ]]; then
@@ -1027,12 +1003,10 @@ fi
 
 # Register proftpd service for autostart and start it
 if [[ "$OS" = "CentOs" ]]; then
-    if [[ "$VER" == "7" ]]; then
+    if [[ "$VER" >= "7" ]]; then
         systemctl enable proftpd.service
         systemctl start proftpd.service
-    else
-        chkconfig proftpd on
-        /etc/init.d/proftpd start
+    
     fi
 fi
 
@@ -1092,7 +1066,7 @@ rm -f $BIND_FILES/rndc.key
 
 # Register Bind service for autostart and start it
 if [[ "$OS" = "CentOs" ]]; then
-    if [[ "$VER" == "7" ]]; then
+    if [[ "$VER" >= "7" ]]; then
         systemctl enable named.service
         systemctl start named.service
     else
@@ -1141,7 +1115,7 @@ chmod 644 "$CRON_FILE"
 
 # Register cron and atd services for autostart and start them
 if [[ "$OS" = "CentOs" ]]; then
-    if [[ "$VER" == "7" ]]; then
+    if [[ "$VER" >= "7" ]]; then
         systemctl enable crond.service
         systemctl start crond.service
         systemctl start atd.service
@@ -1246,7 +1220,7 @@ chattr -i /etc/resolv.conf
 
 
 #--- Restart all services to capture output messages, if any
-if [[ "$OS" = "CentOs" && "$VER" == "7" ]]; then
+if [[ "$OS" = "CentOs" && "$VER" >= "7" ]]; then
     # CentOs7 does not return anything except redirection to systemctl :-(
     service() {
        echo "Restarting $1"
