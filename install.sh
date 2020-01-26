@@ -31,11 +31,6 @@
 #   and all those who participated to this and to previous installers.
 #   Thanks to all.
 
-## 
-# SENTORA_CORE/INSTALLER_VERSION
-# master - latest unstable
-# 1.0.3 - example stable tag
-##
 SENTORA_INSTALLER_VERSION="master"
 SENTORA_CORE_VERSION="2.0"
 
@@ -104,7 +99,6 @@ if [ -e /usr/local/cpanel ] || [ -e /usr/local/directadmin ] || [ -e /usr/local/
     exit 1
 fi
 
-# Check for some common packages that we know will affect the installation/operating of Sentora.
 if [[ "$OS" = "CentOs" ]] ; then
     PACKAGE_INSTALLER="yum -y -q install"
     PACKAGE_REMOVER="yum -y -q remove"
@@ -163,7 +157,7 @@ fi
 # Update repositories and Install wget and util used to grab server IP
 echo -e "\n-- Installing wget and dns utils required to manage inputs"
 if [[ "$OS" = "CentOs" ]]; then
-    $PACKAGE_INSTALLER bind-utils yum-utils
+    $PACKAGE_INSTALLER bind-utils yum-utils git 
 elif [[ "$OS" = "Ubuntu" || "$OS" = "debian" ]]; then
     apt-get -yqq update   #ensure we can install
     $PACKAGE_INSTALLER dnsutils
