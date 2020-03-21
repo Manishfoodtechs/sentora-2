@@ -65,7 +65,7 @@ ARCH=$(uname -m)
 
 echo "Detected : $OS  $VER  $ARCH"
 
-if [[ ("$OS" = "CentOs" && "$VER" >= "7") || ("$OS" = "Ubuntu" && "$VER" >= "14") || ("$OS" = "debian" && "$VER" >= "8" ) ]] ; then
+if [[ ("$OS" = "CentOs" && "$VER" -ge "7") || ("$OS" = "Ubuntu" && "$VER" -ge "14") || ("$OS" = "debian" && "$VER" -ge "8" ) ]] ; then
     echo "Ok."
 else
     echo "Sorry, this OS is either expired already or bound to go EOL soon and as such is not supported by Sentora2 security standards." 
@@ -871,9 +871,9 @@ elif [[ "$OS" = "Ubuntu" || "$OS" = "debian" ]]; then
 fi
 
 # adjustments for apache 2.4
-if [[ ("$OS" = "CentOs" && "$VER" >= "7") || 
-      ("$OS" = "Ubuntu" && "$VER" >= "14.04") || 
-      ("$OS" = "debian" && "$VER" >= "8") ]] ; then 
+if [[ ("$OS" = "CentOs" && "$VER" -ge "7") || 
+      ("$OS" = "Ubuntu" && "$VER" -ge "14.04") || 
+      ("$OS" = "debian" && "$VER" -ge "8") ]] ; then 
     # Order deny,allow / Deny from all   ->  Require all denied
     sed -i 's|Order deny,allow|Require all denied|I'  $PANEL_CONF/apache/httpd.conf
     sed -i '/Deny from all/d' $PANEL_CONF/apache/httpd.conf
@@ -997,7 +997,7 @@ fi
 
 # Register proftpd service for autostart and start it
 if [[ "$OS" = "CentOs" ]]; then
-    if [[ "$VER" >= "7" ]]; then
+    if [[ "$VER" -ge "7" ]]; then
         systemctl enable proftpd.service
         systemctl start proftpd.service
     
@@ -1060,7 +1060,7 @@ rm -f $BIND_FILES/rndc.key
 
 # Register Bind service for autostart and start it
 if [[ "$OS" = "CentOs" ]]; then
-    if [[ "$VER" >= "7" ]]; then
+    if [[ "$VER" -ge "7" ]]; then
         systemctl enable named.service
         systemctl start named.service
     else
@@ -1109,7 +1109,7 @@ chmod 644 "$CRON_FILE"
 
 # Register cron and atd services for autostart and start them
 if [[ "$OS" = "CentOs" ]]; then
-    if [[ "$VER" >= "7" ]]; then
+    if [[ "$VER" -ge "7" ]]; then
         systemctl enable crond.service
         systemctl start crond.service
         systemctl start atd.service
@@ -1214,7 +1214,7 @@ chattr -i /etc/resolv.conf
 
 
 #--- Restart all services to capture output messages, if any
-if [[ "$OS" = "CentOs" && "$VER" >= "7" ]]; then
+if [[ "$OS" = "CentOs" && "$VER" -ge "7" ]]; then
     # CentOs7 does not return anything except redirection to systemctl :-(
     service() {
        echo "Restarting $1"
