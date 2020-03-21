@@ -32,9 +32,9 @@
 #   Thanks to all.
 
 SENTORA_INSTALLER_VERSION="master"
-SENTORA_CORE_VERSION="2.0"
+SENTORA_CORE_VERSION="1.0.1"
 
-PANEL_PATH="/etc/sentora"
+PANEL_PATH="/etc/sentora/panel"
 PANEL_DATA="/var/sentora"
 PANEL_UPGRADE=false
 
