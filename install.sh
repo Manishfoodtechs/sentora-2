@@ -17,7 +17,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Supported Operating Systems: 
-# CentOS 6.*/7.* Minimal, 
+# CentOS 7 Minimal, 
 # Ubuntu server 12.04/14.04 
 # Debian 7.*/8.* 
 # 32bit and 64bit
